@@ -8,26 +8,25 @@ env:
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 jobs:
-  prepare:
-    name: prepare
+  pr-check:
+    name: "PR-traffic-light"
     runs-on: ubuntu-latest
-    outputs:
-      labels: ${{ steps.get-merged-pull-request.outputs.labels }}
-    steps:
 
-      - name: Get pull request a
-        uses: actions-ecosystem/action-get-merged-pull-request@v1.0.1
-        id: get-merged-pull-request
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - id: prinfo
+        uses: actions-ecosystem/action-get-merged-pull-request@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Echo
+      - name: Operator test
+        id: op-traffic-light
+        env:
+          OP_TEST_LABELS: "${{ steps.prinfo.outputs.labels }}"
         run: |
-          echo "$GITHUB_REF"
-          echo "PR: ${{ steps.get-merged-pull-request.outputs.number }}"
-          echo "labels: ${{ steps.get-merged-pull-request.outputs.labels }}"
-          echo ::set-output name=pr-labels::${{ steps.get-merged-pull-request.outputs.labels }}
-
-      - name: Run
-        if: contains(steps.get-merged-pull-request.outputs.labels, 'release')
-        run: echo "Hi"
+          echo "PR : ${{ steps.prinfo.outputs.number }}"
+          echo "labels : ${{ steps.prinfo.outputs.labels }}"
+    outputs:
+      op_test_labels: "${{ steps.prinfo.outputs.labels }}"
