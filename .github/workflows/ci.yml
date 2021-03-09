@@ -1,0 +1,32 @@
+name: ci
+
+on:
+  push:
+
+env:
+  GITHUB_SHA: ${{ github.sha }}
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+jobs:
+  pr-check:
+    name: "PR-traffic-light"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - id: prinfo
+        uses: actions-ecosystem/action-get-merged-pull-request@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Operator test
+        id: op-traffic-light
+        env:
+          OP_TEST_LABELS: "${{ steps.prinfo.outputs.labels }}"
+        run: |
+          echo "PR : ${{ steps.prinfo.outputs.number }}"
+          echo "labels : ${{ steps.prinfo.outputs.labels }}"
+    outputs:
+      op_test_labels: "${{ steps.prinfo.outputs.labels }}"
