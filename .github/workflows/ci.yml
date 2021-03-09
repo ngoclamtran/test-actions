@@ -10,7 +10,7 @@ env:
 jobs:
   prepare:
     name: prepare
-    runs-on: self-hosted-cpu
+    runs-on: ubuntu-latest
     outputs:
       labels: ${{ steps.get-merged-pull-request.outputs.labels }}
     steps:
