@@ -1,0 +1,29 @@
+name: ci
+
+on:
+  push:
+
+env:
+  GITHUB_SHA: ${{ github.sha }}
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+jobs:
+  prepare:
+    name: prepare
+    runs-on: self-hosted-cpu
+    outputs:
+      labels: ${{ steps.get-merged-pull-request.outputs.labels }}
+    steps:
+
+      - name: Get pull request a
+        uses: actions-ecosystem/action-get-merged-pull-request@v1.0.1
+        id: get-merged-pull-request
+        with:
+          github_token: ${{ secrets.TOKEN }}
+
+      - name: Echo
+        run: |
+          echo "$GITHUB_REF"
+          echo "PR: ${{ steps.get-merged-pull-request.outputs.number }}"
+          echo "labels: ${{ steps.get-merged-pull-request.outputs.labels }}"
+          echo ::set-output name=pr-labels::${{ steps.get-merged-pull-request.outputs.labels }}
